@@ -8,6 +8,11 @@ from Cryptodome.Cipher import AES
 import base64
 from Cryptodome.Util.Padding import unpad
 from subprocess import getstatusoutput
+import aiohttp
+import aiofiles
+
+# Global variables for optimization
+failed_counter = 0
 
 def decrypt_encrypted_mpd_key(url):
     key = b'638udh3829162018'
@@ -20,44 +25,56 @@ def decrypt_encrypted_mpd_key(url):
     return mpd, keys
 
 def duration(filename):
-    result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
-                             "format=duration", "-of",
-                             "default=noprint_wrappers=1:nokey=1", filename],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT)
-    return float(result.stdout)
+    try:
+        result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                                "format=duration", "-of",
+                                "default=noprint_wrappers=1:nokey=1", filename],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30)
+        return float(result.stdout)
+    except Exception as e:
+        logging.error(f"Duration error: {e}")
+        return 0
 
 async def download_video(url, cmd, name):
-    download_cmd = f'{cmd} -R 25 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -j 32"'
+    """Optimized download function with better error handling"""
+    # Enhanced download command for better speed
+    download_cmd = f'{cmd} --no-part --retries 10 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -s 32 -k 1M -j 32 --file-allocation=none"'
+    
     global failed_counter
-    print(download_cmd)
+    print(f"🚀 Fast Download: {download_cmd}")
     logging.info(download_cmd)
-    k = subprocess.run(download_cmd, shell=True)
-    if "visionias" in cmd and k.returncode != 0 and failed_counter <= 10:
-        failed_counter += 1
-        await asyncio.sleep(5)
-        await download_video(url, cmd, name)
-    failed_counter = 0
+    
     try:
-        if os.path.isfile(name):
-            return name
-        elif os.path.isfile(f"{name}.webm"):
-            return f"{name}.webm"
-        name = name.split(".")[0]
-        if os.path.isfile(f"{name}.mkv"):
-            return f"{name}.mkv"
-        elif os.path.isfile(f"{name}.mp4"):
-            return f"{name}.mp4"
-        elif os.path.isfile(f"{name}.mp4.webm"):
-            return f"{name}.mp4.webm"
+        # Run with timeout
+        k = subprocess.run(download_cmd, shell=True, timeout=3600)
+        
+        if "visionias" in cmd and k.returncode != 0 and failed_counter <= 5:
+            failed_counter += 1
+            await asyncio.sleep(3)
+            return await download_video(url, cmd, name)
+            
+        failed_counter = 0
+        
+        # Fast file detection
+        possible_extensions = ['', '.mp4', '.mkv', '.webm', '.mp4.webm']
+        for ext in possible_extensions:
+            full_name = name if ext == '' else f"{name.split('.')[0]}{ext}"
+            if os.path.isfile(full_name):
+                return full_name
+                
+        return f"{name.split('.')[0]}.mp4"
+        
+    except subprocess.TimeoutExpired:
+        logging.error("Download timeout")
+        return await download_video(url, cmd, name)
+    except Exception as e:
+        logging.error(f"Download error: {e}")
+        return f"{name.split('.')[0]}.mp4"
 
-        return name
-    except FileNotFoundError as esc:
-        return os.path.splitext(name)[0] + "." + "mp4"
-
-# New function for Kalam Publication downloads
 async def download_kalam_video(url, name):
-    """Download Kalam Publication videos with custom headers"""
+    """Optimized Kalam download with faster settings"""
     try:
         headers = [
             'User-Agent: okhttp/4.12.0',
@@ -69,144 +86,203 @@ async def download_kalam_video(url, name):
         ]
         
         header_args = " ".join([f'--add-header "{header}"' for header in headers])
-        cmd = f'yt-dlp {header_args} -o "{name}.mp4" "{url}"'
         
-        download_cmd = f'{cmd} -R 25 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -j 32"'
+        # Ultra fast download command
+        cmd = f'yt-dlp {header_args} --no-part --retries 5 --fragment-retries 10 --external-downloader aria2c --downloader-args "aria2c: -x 32 -s 64 -k 2M -j 64 --file-allocation=none" -o "{name}.mp4" "{url}"'
         
-        print(f"Downloading Kalam video: {download_cmd}")
-        logging.info(download_cmd)
+        print(f"🚀 Turbo Kalam Download: {cmd}")
+        logging.info(cmd)
         
-        k = subprocess.run(download_cmd, shell=True)
+        k = subprocess.run(cmd, shell=True, timeout=1800)
         
         if k.returncode != 0:
-            await asyncio.sleep(5)
+            await asyncio.sleep(2)
             return await download_kalam_video(url, name)
             
-        # Check for downloaded file
-        if os.path.isfile(f"{name}.mp4"):
-            return f"{name}.mp4"
-        elif os.path.isfile(f"{name}.mkv"):
-            return f"{name}.mkv"
-        elif os.path.isfile(f"{name}.webm"):
-            return f"{name}.webm"
-            
+        # Quick file check
+        for ext in ['.mp4', '.mkv', '.webm']:
+            if os.path.isfile(f"{name}{ext}"):
+                return f"{name}{ext}"
+                
         return f"{name}.mp4"
         
     except Exception as e:
-        logging.error(f"Error downloading Kalam video: {e}")
+        logging.error(f"Kalam download error: {e}")
         raise e
-    
+
 async def send_vid(bot, m, cc, filename, thumb, name, prog, url, channel_id):
-    xx = await bot.send_message(channel_id, f"**Generate Thumbnail** - `{name}`")
+    """ULTRA FAST UPLOAD FUNCTION"""
+    
+    # Delete progress message immediately
     await prog.delete(True)
-    await xx.delete()  
-    reply = await bot.send_message(channel_id, f"**📩 Uploading 📩:-**\n\n**Name :-** `{name}\n🎥**Url -** `{url}`\n\nDRM Bot Made By 🔰『@NtrRazYt』🔰") 
+    
+    # Send upload message
+    reply = await bot.send_message(
+        channel_id, 
+        f"**🚀 Turbo Uploading 🚀**\n\n**Name:** `{name}`\n**URL:** `{url}`\n\nDRM Bot Made By 🔰『sargio』🔰"
+    )
+    
+    # PARALLEL PROCESSING: Generate thumbnail while getting duration
+    final_thumb = None
+    video_duration = 0
+    
+    async def generate_thumbnail():
+        nonlocal final_thumb
+        try:
+            if thumb.startswith(("http://", "https://")):
+                # Fast download with wget
+                subprocess.run(f'wget -q --timeout=10 "{thumb}" -O "temp_thumb.jpg"', shell=True)
+                if os.path.exists("temp_thumb.jpg"):
+                    final_thumb = "temp_thumb.jpg"
+                    
+            elif thumb.lower() == "no" or True:  # Always generate auto thumbnail
+                # Fast thumbnail generation
+                thumb_cmd = f'ffmpeg -i "{filename}" -ss 00:00:05 -vframes 1 -y "auto_thumb.jpg"'
+                subprocess.run(thumb_cmd, shell=True, timeout=10)
+                if os.path.exists("auto_thumb.jpg"):
+                    final_thumb = "auto_thumb.jpg"
+                    
+        except Exception as e:
+            logging.error(f"Thumbnail error: {e}")
+    
+    async def get_duration():
+        nonlocal video_duration
+        try:
+            video_duration = int(duration(filename))
+        except:
+            video_duration = 0
+    
+    # Run both tasks in parallel
+    await asyncio.gather(
+        generate_thumbnail(),
+        get_duration(),
+        return_exceptions=True
+    )
+    
+    # UPLOAD WITH OPTIMIZED SETTINGS
+    start_time = time.time()
+    
     try:
-        if thumb.startswith("http://") or thumb.startswith("https://"):
-            getstatusoutput(f"wget '{thumb}' -O 'Local_thumb.jpg'")
-            thumb = "Local_thumb.jpg"
-            logging.info("Url Thumb downloaded successfully!")
-        elif thumb.lower() == "no":
-            subprocess.run(f'ffmpeg -i "{filename}" -ss 00:01:00 -vframes 1 "{filename}.jpg"', shell=True)
-            subprocess.run(f'ffmpeg -i "{filename}.jpg" -i watermark.png -filter_complex "overlay=(W-w)/2:(H-h)/2" "{filename}_thumbnail_watermarked.jpg"', shell=True)
-            thumb = f"{filename}_thumbnail_watermarked.jpg"
-            logging.info("Watermark Thumb downloaded successfully!")
-        else:
-            subprocess.run(f'ffmpeg -i "{filename}" -ss 00:01:00 -vframes 1 "{filename}.jpg"', shell=True)
-            thumb = f"{filename}.jpg"
-            logging.info("Default Thumb downloaded successfully!")
+        upload_args = {
+            'chat_id': channel_id,
+            'video': filename,
+            'caption': cc,
+            'supports_streaming': True,
+            'duration': video_duration,
+            'progress_args': (reply, start_time)
+        }
+        
+        # Add thumbnail if available
+        if final_thumb and os.path.exists(final_thumb):
+            upload_args['thumb'] = final_thumb
+        
+        # HIGH SPEED UPLOAD
+        await bot.send_video(**upload_args)
+        
     except Exception as e:
-        logging.error(f"Error while processing thumbnail: {e}")
-        await m.reply_text(str(e))  
-    dur = int(duration(filename))
-    start_time = time.time()   
+        logging.error(f"Upload error: {e}")
+        # Fallback without thumbnail
+        try:
+            await bot.send_video(
+                chat_id=channel_id,
+                video=filename,
+                caption=cc,
+                progress_args=(reply, start_time)
+            )
+        except Exception as e2:
+            logging.error(f"Fallback upload also failed: {e2}")
+    
+    # FAST CLEANUP
     try:
-        await bot.send_video(chat_id=channel_id, video=filename, caption=cc, supports_streaming=True, height=720, width=1280, thumb=thumb, duration=dur, progress_args=(reply, start_time))
+        # Remove main video file
+        if os.path.exists(filename):
+            os.remove(filename)
+        
+        # Remove thumbnail files
+        for temp_file in ["temp_thumb.jpg", "auto_thumb.jpg", "Local_thumb.jpg"]:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+                
     except Exception as e:
-        logging.error(f"Error while sending video: {e}")
-        await bot.send_video(chat_id=channel_id, video=filename, caption=cc, progress_args=(reply, start_time))   
-    os.remove(filename)
-    if thumb.endswith("_thumbnail_watermarked.jpg"):
-        os.remove(f"{filename}.jpg")
-        os.remove(thumb)
-    elif thumb == "Local_thumb.jpg":
-        os.remove(thumb)
-    elif thumb.endswith(".jpg"):
-        os.remove(thumb)
+        logging.error(f"Cleanup error: {e}")
+    
+    # Delete upload message
     await reply.delete(True)
 
 async def download_and_dec_video(mpd, keys, path, name, raw_text2):
+    """Optimized download and decrypt"""
     if os.path.exists(path):
         shutil.rmtree(path)
-    os.makedirs(path)
-    subprocess.run(f'yt-dlp -o "{path}/fileName.%(ext)s" -f "bestvideo[height<={int(raw_text2)}]+bestaudio" --allow-unplayable-format --external-downloader aria2c "{mpd}"', shell=True)
+    os.makedirs(path, exist_ok=True)
+    
+    # Faster download command
+    download_cmd = f'yt-dlp -o "{path}/fileName.%(ext)s" -f "bestvideo[height<={int(raw_text2)}]+bestaudio" --no-part --external-downloader aria2c --downloader-args "aria2c: -x 16 -s 32 -j 32" --allow-unplayable-format "{mpd}"'
+    
+    print(f"🚀 Fast MPD Download: {download_cmd}")
+    subprocess.run(download_cmd, shell=True, timeout=1800)
+    
+    # Parallel decryption
     avDir = os.listdir(path)
-    print(avDir)
-    print("Decrypting")
-    try:
-        for data in avDir:
-            if data.endswith("mp4"):
-                cmd2 = f'mp4decrypt {keys} --show-progress "{path}/{data}" "{path}/video.mp4"'
-                subprocess.run(cmd2, shell=True)
-                os.remove(f'{path}/{data}')
-                print('Video Dec done')
-            elif data.endswith("m4a"):
-                cmd3 = f'mp4decrypt {keys} --show-progress "{path}/{data}" "{path}/audio.m4a"'
-                subprocess.run(cmd3, shell=True)
-                os.remove(f'{path}/{data}')
-                print("audio dec done")
-    except FileNotFoundError:
-        return os.path.splitext(name)[0] + "." + "mp4"
+    print("🔓 Parallel Decrypting...")
+    
+    decryption_commands = []
+    for data in avDir:
+        if data.endswith("mp4"):
+            decryption_commands.append(f'mp4decrypt {keys} "{path}/{data}" "{path}/video.mp4"')
+        elif data.endswith("m4a"):
+            decryption_commands.append(f'mp4decrypt {keys} "{path}/{data}" "{path}/audio.m4a"')
+    
+    # Run decryption in parallel
+    processes = []
+    for cmd in decryption_commands:
+        processes.append(subprocess.Popen(cmd, shell=True))
+    
+    # Wait for all to complete
+    for p in processes:
+        p.wait()
+    
+    # Cleanup original files
+    for data in avDir:
+        if os.path.exists(f'{path}/{data}'):
+            os.remove(f'{path}/{data}')
 
 async def merge_and_send_vid(bot, m, cc, name, prog, path, url, thumb, channel_id):
-    xx = await bot.send_message(channel_id, f"**Video & Audio Merging** - `{name}`")
+    """Optimized merge and upload"""
+    
+    # Fast merging
     video_path = os.path.join(path, "video.mp4")  
     audio_path = os.path.join(path, "audio.m4a") 
-    subprocess.run(f'ffmpeg -i "{video_path}" -i "{audio_path}" -c copy "{os.path.join(path, name)}.mp4"', shell=True)
-    os.remove(video_path)
-    os.remove(audio_path)
-    video = f"{os.path.join(path, name)}.mp4"
-    await xx.edit("Generate Thumbnail")
+    final_video = f"{os.path.join(path, name)}.mp4"
+    
+    # Quick merge
+    merge_cmd = f'ffmpeg -i "{video_path}" -i "{audio_path}" -c copy -y "{final_video}"'
+    subprocess.run(merge_cmd, shell=True, timeout=300)
+    
+    # Clean intermediate files immediately
+    for temp_file in [video_path, audio_path]:
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
+    
+    # Delete progress message
     await prog.delete(True)
-    await xx.delete()  
-    reply = await bot.send_message(channel_id, f"**📩 Uploading 📩:-**\n\n**Name :-** `{name}\n🎥**Url -** `{url}`\n\nDRM Bot Made By 🔰『@NtrRazYt』🔰") 
-    try:
-        if thumb.startswith("http://") or thumb.startswith("https://"):
-            getstatusoutput(f"wget '{thumb}' -O 'Local_thumb.jpg'")
-            thumb = "Local_thumb.jpg"
-            logging.info("Url Thumb downloaded successfully!")
-        elif thumb.lower() == "no":
-            subprocess.run(f'ffmpeg -i "{video}" -ss 00:01:00 -vframes 1 "{video}.jpg"', shell=True)
-            subprocess.run(f'ffmpeg -i "{video}.jpg" -i watermark.png -filter_complex "overlay=(W-w)/2:(H-h)/2" "{video}_thumbnail_watermarked.jpg"', shell=True)
-            thumb = f"{video}_thumbnail_watermarked.jpg"
-            logging.info("Watermark Thumb downloaded successfully!")
-        else:
-            subprocess.run(f'ffmpeg -i "{video}" -ss 00:01:00 -vframes 1 "{video}.jpg"', shell=True)
-            thumb = f"{video}.jpg"
-            logging.info("Default Thumb downloaded successfully!")
-    except Exception as e:
-        logging.error(f"Error while processing thumbnail: {e}")
-        await m.reply_text(str(e))  
-    dur = int(duration(video))
-    start_time = time.time() 
-    try:  
-        await bot.send_video(chat_id=channel_id, video=video, thumb=thumb, caption=cc, supports_streaming=True, height=720, width=1280, duration=dur, progress_args=(reply, start_time))  
-    except Exception as e:
-        logging.error(f"Error while sending video: {e}")
-        await bot.send_video(chat_id=channel_id, video=video, caption=cc, progress_args=(reply, start_time))   
-    os.remove(video)
-    if thumb.endswith("_thumbnail_watermarked.jpg"):
-        os.remove(f"{video}.jpg")
-        os.remove(thumb)
-    elif thumb == "Local_thumb.jpg":
-        os.remove(thumb)
-    elif thumb.endswith(".jpg"):
-        os.remove(thumb)
-    await reply.delete(True)
+    
+    # Use the optimized send function
+    await send_vid(bot, m, cc, final_video, thumb, name, 
+                  await bot.send_message(channel_id, "Merging Complete"), 
+                  url, channel_id)
 
-def duration(video):
+# Additional optimization function
+async def optimize_video_for_upload(filename):
+    """Optional: Optimize video for faster upload"""
     try:
-        result = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", video], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        return float(result.stdout)
-    except Exception:
-        return 0
+        optimized_file = f"optimized_{filename}"
+        # Fast optimization without re-encoding if possible
+        cmd = f'ffmpeg -i "{filename}" -c copy -movflags +faststart -y "{optimized_file}"'
+        subprocess.run(cmd, shell=True, timeout=300)
+        
+        if os.path.exists(optimized_file):
+            os.remove(filename)
+            return optimized_file
+        return filename
+    except:
+        return filename
