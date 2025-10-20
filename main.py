@@ -162,7 +162,7 @@ async def account_login(bot: Client, m: Message):
                 async with ClientSession() as session:
                     async with session.get(url, headers=headers.vision) as resp:
                         text = await resp.text()
-                        url = re.search(r"(https://*.?playlist.m3u8.?)"", text).group(1)
+                        url = re.search(r"(https://*.?playlist.m3u8.?)", text).group(1)
                         print(url)
 
             name1 = links[i][0].replace("\t", "").replace(":", " ").replace("/", "").replace("+", "").replace("#", "").replace("|", "").replace("@", "").replace("*", "").replace(".", "").replace("https", "").replace("http", "").strip()
