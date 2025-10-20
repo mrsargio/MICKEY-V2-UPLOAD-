@@ -103,7 +103,7 @@ async def account_login(bot: Client, m: Message):
         raw_text3 = input3.text
         await input3.delete(True)
         if raw_text3 == 'de':
-            MR = "『ᎷΔŞŦᏋᏒ』❤️"
+            MR = "Sargio ❤️"
         else:               
             MR = raw_text3
     
@@ -123,7 +123,7 @@ async def account_login(bot: Client, m: Message):
         try:
             await bot.send_message(chat_id=channel_id, text=f'🎯**Target Batch - {b_name}**')
         except Exception as e:
-            await m.reply_text(f"**Fail Reason »** {e}\n\n**Bot Made By** 🌟『@NtrRazYt』🌟")
+            await m.reply_text(f"**Fail Reason »** {e}\n\n**Bot Made By** 🌟Sargio🌟")
             return
         await editable.delete()
         if len(links) == 1:
