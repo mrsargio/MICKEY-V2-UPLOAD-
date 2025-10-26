@@ -28,7 +28,7 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 @bot.on_message(filters.command(["start"]))
 async def account_login(bot: Client, m: Message):
-    await m.reply_text(f"😈**Hi bruh!**\n**🟢I'm Alive You can Use by /master**\n\n**<-URL Acceptable->**\n-`All Non-Drm+Drm Protected Url`\n-`Mpeg Dash Url`\n-`Vision IAS`\n-`PhysicsWallah`\n-`ClassPlus Url`\n-`Allen Institute`\n-`Kalam Publication`\n\n**Thanks for using me**\n\n**Developer -** `@St2Master`")
+    await m.reply_text(f"🌥️ **Hello, Master.**\n**🟢I'm active and running smoothly ⚡  /master**\n\n**<-URL Acceptable->**\n-`All Non-Drm+Drm Protected Url`\n-`Mpeg Dash Url`\n-`Vision IAS`\n-`PhysicsWallah`\n-`ClassPlus Url`\n-`Allen Institute`\n-`Kalam Publication`\n\n**Thanks for using me**\n\n**Developer -** `@St2Master`")
 
 @bot.on_message(filters.command("stop"))
 async def restart_handler(bot, m):
@@ -183,8 +183,8 @@ async def account_login(bot: Client, m: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'    
                 
             try:
-                cc = f'**[🎥]Vid Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} [{raw_text2}] .mkv \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠ ** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🌟Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'
-                cc1 = f'**[📕]Pdf Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} .pdf \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠:** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🌟Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'                   
+                cc = f'**[🎓]Vid Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} [{raw_text2}] .mkv \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠ ** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🌟Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'
+                cc1 = f'**[🗳]Pdf Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} .pdf \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠:** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🌟Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'                   
 
                 if "drive" in url or ".pdf" in url or "pdfs" in url:
                     try:
@@ -200,7 +200,7 @@ async def account_login(bot: Client, m: Message):
                         continue
 
                 elif mpd and keys:
-                    Show = f"**🤖 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 🤖:-**\n\n**Name :-** `{name}\n🎥**Url -** `{url}`\n🎥Video Quality - {raw_text2}\n\n Bot Made By  🌟『@NtrRazYt』 🌟"
+                    Show = f"**⏳ 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 ⏳:-**\n\n**Name :-** `{name}\n🎥**Url -** `{url}`\n🎥Video Quality - {raw_text2}\n\n Bot Made By  ⏰『sargio』⏰"
                     prog = await bot.send_message(channel_id, Show)
                     await helper.download_and_dec_video(mpd, keys, path, name, raw_text2)
                     await prog.delete(True)
@@ -209,7 +209,7 @@ async def account_login(bot: Client, m: Message):
                     time.sleep(3)
                 else:
                     mpd = None
-                    Show = f"**🤖 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 🤖:-**\n\n**Name :-** `{name}\n🎥Video Quality - {raw_text2}\n\n Bot Made By  🌟『@NtrRazYt』 🌟"
+                    Show = f"**🤖 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 🤖:-**\n\n**Name :-** `{name}\n🎥Video Quality - {raw_text2}\n\n Bot Made By  ⏰『sargio』⏰"
                     prog = await bot.send_message(channel_id, Show)
                     
                     # Use special function for Kalam videos
@@ -229,7 +229,7 @@ async def account_login(bot: Client, m: Message):
                 continue
         await bot.send_message(channel_id, " 🌟** Sᴜᴄᴄᴇsғᴜʟʟʏ Dᴏᴡɴʟᴏᴀᴅᴇᴅ Aʟʟ Lᴇᴄᴛᴜʀᴇs...! **🌟 ")
     except Exception as e:
-        await m.reply_text(f"**⚠️Sorry Boss Downloading Failed⚠️**\n\n**Fail Reason »** {e}\n\n**Bot Made By**  🌟『@NtrRazYt』 🌟")
+        await m.reply_text(f"**⚠️Sorry Boss Downloading Failed⚠️**\n\n**Fail Reason »** {e}\n\n**Bot Made By**  ⏰『sargio』⏰")
         return
 
 bot.run()
