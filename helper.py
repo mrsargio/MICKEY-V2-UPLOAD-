@@ -159,7 +159,7 @@ async def download_video(url, cmd, name):
         return f"{name.split('.')[0]}.mp4"
 
 async def download_kalam_video(url, name):
-    """Optimized Kalam download with progress tracking"""
+    """Optimized Kalam download with HTTP 416 error handling"""
     try:
         headers = [
             'User-Agent: okhttp/4.12.0',
@@ -172,20 +172,84 @@ async def download_kalam_video(url, name):
         
         header_args = " ".join([f'--add-header "{header}"' for header in headers])
         
-        # Ultra fast download command with progress
-        cmd = f'yt-dlp {header_args} --no-part --retries 5 --fragment-retries 10 --external-downloader aria2c --downloader-args "aria2c: -x 32 -s 64 -k 2M -j 64 --file-allocation=none --summary-interval=1" -o "{name}.mp4" "{url}"'
+        # Check if file exists and handle HTTP 416 error
+        output_file = f"{name}.mp4"
+        
+        # If file exists and might be corrupted/incomplete, remove it
+        if os.path.exists(output_file):
+            print(f"🔄 Existing file detected. Checking for corruption...")
+            try:
+                file_size = os.path.getsize(output_file)
+                if file_size > 0:
+                    # Try to get file duration to check if it's playable
+                    result = subprocess.run([
+                        "ffprobe", "-v", "error", "-show_entries", 
+                        "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", 
+                        output_file
+                    ], capture_output=True, timeout=10)
+                    
+                    if result.returncode != 0:
+                        print(f"🗑️ Removing corrupted file: {output_file}")
+                        os.remove(output_file)
+                    else:
+                        print(f"✅ Existing file appears valid. Size: {file_size} bytes")
+                        return output_file
+            except Exception as e:
+                print(f"🗑️ Removing problematic file: {e}")
+                os.remove(output_file)
+        
+        # FIXED: Use --no-continue to avoid HTTP 416 errors and force fresh download
+        cmd = f'yt-dlp {header_args} --no-part --no-continue --retries 5 --fragment-retries 10 --external-downloader aria2c --downloader-args "aria2c: -x 16 -s 32 -k 1M -j 16 --file-allocation=none --summary-interval=1 --max-tries=5 --retry-wait=2" -o "{name}.mp4" "{url}"'
         
         print(f"🚀 Turbo Kalam Download Started")
+        print(f"📝 Command: {cmd}")
         logging.info(cmd)
         
-        process = await asyncio.create_subprocess_shell(cmd, shell=True)
+        # Run with progress tracking
+        process = await asyncio.create_subprocess_shell(
+            cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE
+        )
+        
+        # Track progress
+        async for line in process.stderr:
+            line = line.decode().strip()
+            if line and not line.startswith('[debug]'):
+                print(f"📥 {line}")
+        
         await process.wait()
         
-        if process.returncode != 0:
-            await asyncio.sleep(2)
+        # Handle different return codes
+        if process.returncode == 0:
+            print(f"✅ Kalam download successful!")
+            
+            # Verify the downloaded file
+            if os.path.exists(output_file):
+                file_size = os.path.getsize(output_file)
+                print(f"📦 File size: {file_size} bytes")
+                return output_file
+            else:
+                print(f"❌ Download completed but file not found: {output_file}")
+                raise Exception("Downloaded file not found")
+                
+        elif process.returncode != 0:
+            print(f"⚠️ Download failed with return code: {process.returncode}")
+            
+            # Specific handling for HTTP 416
+            if os.path.exists(output_file):
+                print(f"🔄 HTTP 416 detected - removing corrupted file and retrying...")
+                try:
+                    os.remove(output_file)
+                    print(f"🗑️ Removed corrupted file: {output_file}")
+                except Exception as e:
+                    print(f"❌ Could not remove file: {e}")
+            
+            await asyncio.sleep(3)
+            print(f"🔄 Retrying download...")
             return await download_kalam_video(url, name)
             
-        # Quick file check
+        # Quick file check as fallback
         for ext in ['.mp4', '.mkv', '.webm']:
             if os.path.isfile(f"{name}{ext}"):
                 print(f"✅ Kalam Download Complete: {name}{ext}")
@@ -195,7 +259,22 @@ async def download_kalam_video(url, name):
         
     except Exception as e:
         logging.error(f"Kalam download error: {e}")
-        raise e
+        print(f"❌ Critical error in Kalam download: {e}")
+        
+        # Clean up any potentially corrupted files
+        for ext in ['.mp4', '.mkv', '.webm', '.part', '.ytdl']:
+            temp_file = f"{name}{ext}"
+            if os.path.exists(temp_file):
+                try:
+                    os.remove(temp_file)
+                    print(f"🗑️ Cleaned up temp file: {temp_file}")
+                except:
+                    pass
+        
+        # Wait before retry
+        await asyncio.sleep(5)
+        print(f"🔄 Final retry attempt...")
+        return await download_kalam_video(url, name)
 
 async def send_vid(bot, m, cc, filename, thumb, name, prog, url, channel_id):
     """ULTRA FAST UPLOAD FUNCTION with Modern Progress"""
@@ -376,7 +455,7 @@ async def download_and_dec_video(mpd, keys, path, name, raw_text2):
     print("🚀 Starting MPD download with progress...")
     
     # Faster download command with progress
-    download_cmd = f'yt-dlp -o "{path}/fileName.%(ext)s" -f "bestvideo[height<={int(raw_text2)}]+bestaudio" --no-part --external-downloader aria2c --downloader-args "aria2c: -x 16 -s 32 -j 32 --summary-interval=1" --allow-unplayable-format "{mpd}"'
+    download_cmd = f'yt-dlp -o "{path}/fileName.%(ext)s" -f "bestvideo[height<={int(raw_text2)}]+bestaudio" --no-part --no-continue --external-downloader aria2c --downloader-args "aria2c: -x 16 -s 32 -j 32 --summary-interval=1" --allow-unplayable-format "{mpd}"'
     
     print(f"📥 MPD Download: {download_cmd}")
     
