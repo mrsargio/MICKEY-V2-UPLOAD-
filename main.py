@@ -28,21 +28,35 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 @bot.on_message(filters.command(["start"]))
 async def account_login(bot: Client, m: Message):
-    await m.reply_text(f"😈**Hi bruh!**\n**🟢I'm Alive You can Use by /master**\n\n**<-URL Acceptable->**\n-`All Non-Drm+Drm Protected Url`\n-`Mpeg Dash Url`\n-`Vision IAS`\n-`PhysicsWallah`\n-`ClassPlus Url`\n-`Allen Institute`\n-`Kalam Publication`\n\n**Thanks for using me**\n\n**Developer -** `@St2Master`")
+    await m.reply_text(
+        f"""🌥️ **Hello, Master.**  
+I’m active and running smoothly ⚡  
 
+💠 **Command Access:** `/master`
+
+🌐 **Supported Platforms:**  
+• Non-DRM & DRM URLs  
+• MPEG-DASH Links  
+• Vision IAS | PhysicsWallah  
+• ClassPlus | Allen | Kalam Publication  
+
+🧠 *Optimized for clarity, speed & precision.*  
+👨‍💻 **Developer:** [@Mr_Dragon](🖲)
+"""
+    )
 @bot.on_message(filters.command("stop"))
 async def restart_handler(bot, m):
     if m.chat.id not in Config.VIP_USERS:
         print(f"User ID not in AUTH_USERS", m.chat.id)
-        await bot.send_message(m.chat.id, f"**Oopss! You are not a Premium member **\n\n**PLEASE UPGRADE YOUR PLAN**\n\n**/upgrade for Plan Details**\n**Send me your user id for authorization your User id** -     `{m.chat.id}`\n\n**Sab kuch free me chahiye kya be laude **")
+        await bot.send_message(m.chat.id, f"**Oopss! You are not a Premium member **\n\n**PLEASE UPGRADE YOUR PLAN**\n\n**/upgrade for Plan Details**\n**Send me your user id for authorization your User id** -     `{m.chat.id}`\n\n**Sab kuch free me chahiye kya 😄 **")
         return
-    await m.reply_text("🚦**STOPPED**🚦", True)
+    await m.reply_text("🔮**STOPPED**🚦", True)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 @bot.on_message(filters.command(["master"]))
 async def account_login(bot: Client, m: Message):
     try:
-        editable = await m.reply_text('**Send 🗂️Master TXT🗂️ file for download**')
+        editable = await m.reply_text('**Send 📩 Master TXT 🧾 file for download**')
         input: Message = await bot.listen(editable.chat.id)
         path = f"./downloads/{m.chat.id}"
         temp_dir = "./temp"
@@ -73,7 +87,7 @@ async def account_login(bot: Client, m: Message):
         await editable.edit(f"Total links🔗 found are **{len(links)}**\n\nSend From where you want to download initial is **1**")
         if m.chat.id not in Config.VIP_USERS:
             print(f"User ID not in AUTH_USERS", m.chat.id)
-            await bot.send_message(m.chat.id, f"**Oopss! You are not a Premium member **\n\n**PLEASE UPGRADE YOUR PLAN**\n\n**/upgrade for Plan Details**\n**Send me your user id for authorization your User id** -     `{m.chat.id}`\n\n**Sab kuch free me chahiye kya be laude**")
+            await bot.send_message(m.chat.id, f"**Oopss! You are not a Premium member **\n\n**PLEASE UPGRADE YOUR PLAN**\n\n**/upgrade for Plan Details**\n**Send me your user id for authorization your User id** -     `{m.chat.id}`\n\n**Sab kuch free me chahiye kya 😄**")
             return
         input0: Message = await bot.listen(editable.chat.id)
         raw_text = input0.text
@@ -183,8 +197,8 @@ async def account_login(bot: Client, m: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'    
                 
             try:
-                cc = f'**[🎥]Vid Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} [{raw_text2}] .mkv \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠ ** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🌟Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'
-                cc1 = f'**[📕]Pdf Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} .pdf \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠:** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🌟Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'                   
+                cc = f'**[🎓]Vid Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} [{raw_text2}] .mkv \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠ ** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🏷Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'
+                cc1 = f'**[🗳]Pdf Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} .pdf \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠:** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🏷Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'                   
 
                 if "drive" in url or ".pdf" in url or "pdfs" in url:
                     try:
@@ -200,7 +214,7 @@ async def account_login(bot: Client, m: Message):
                         continue
 
                 elif mpd and keys:
-                    Show = f"**🤖 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 🤖:-**\n\n**Name :-** `{name}\n🎥**Url -** `{url}`\n🎥Video Quality - {raw_text2}\n\n Bot Made By  🌟『@NtrRazYt』 🌟"
+                    Show = f"**⏳ 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 ⏳:-**\n\n**Name :-** `{name}\n🎥**Url -** `{url}`\n🎥Video Quality - {raw_text2}\n\n Bot Made By  ⏰『sargio』 ⏰"
                     prog = await bot.send_message(channel_id, Show)
                     await helper.download_and_dec_video(mpd, keys, path, name, raw_text2)
                     await prog.delete(True)
@@ -209,7 +223,7 @@ async def account_login(bot: Client, m: Message):
                     time.sleep(3)
                 else:
                     mpd = None
-                    Show = f"**🤖 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 🤖:-**\n\n**Name :-** `{name}\n🎥Video Quality - {raw_text2}\n\n Bot Made By  🌟『@NtrRazYt』 🌟"
+                    Show = f"**⏳ 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 ⏳:-**\n\n**Name :-** `{name}\n🎥Video Quality - {raw_text2}\n\n Bot Made By  ⏰『sargio』 ⏰"
                     prog = await bot.send_message(channel_id, Show)
                     
                     # Use special function for Kalam videos
@@ -229,7 +243,7 @@ async def account_login(bot: Client, m: Message):
                 continue
         await bot.send_message(channel_id, " 🌟** Sᴜᴄᴄᴇsғᴜʟʟʏ Dᴏᴡɴʟᴏᴀᴅᴇᴅ Aʟʟ Lᴇᴄᴛᴜʀᴇs...! **🌟 ")
     except Exception as e:
-        await m.reply_text(f"**⚠️Sorry Boss Downloading Failed⚠️**\n\n**Fail Reason »** {e}\n\n**Bot Made By**  🌟『@NtrRazYt』 🌟")
+        await m.reply_text(f"**⚠️Sorry Boss Downloading Failed⚠️**\n\n**Fail Reason »** {e}\n\n**Bot Made By**  ⏰『sargio』 ⏰")
         return
 
 bot.run()
