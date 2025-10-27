@@ -12,6 +12,7 @@ import os, re
 import requests
 import headers
 import logging
+import asyncio
 
 bot = Client(
     "bot",
@@ -28,7 +29,7 @@ logging.getLogger("pyrogram").setLevel(logging.WARNING)
 
 @bot.on_message(filters.command(["start"]))
 async def account_login(bot: Client, m: Message):
-    await m.reply_text(f"🌥️ **Hello, Master.**\n**🟢I'm active and running smoothly ⚡  /master**\n\n**<-URL Acceptable->**\n-`All Non-Drm+Drm Protected Url`\n-`Mpeg Dash Url`\n-`Vision IAS`\n-`PhysicsWallah`\n-`ClassPlus Url`\n-`Allen Institute`\n-`Kalam Publication`\n\n**Thanks for using me**\n\n**Developer -** `@St2Master`")
+    await m.reply_text(f"🌥️ **Hello, Master.**\n**🟢I'm active and running smoothly ⚡  /master**\n\n**<-URL Acceptable->**\n-`All Non-Drm+Drm Protected Url`\n-`Mpeg Dash Url`\n-`Vision IAS`\n-`PhysicsWallah`\n-`ClassPlus Url`\n-`Allen Institute`\n-`Kalam Publication`\n\n**Thanks for using me**\n\n**Developer -** `@Sargio`")
 
 @bot.on_message(filters.command("stop"))
 async def restart_handler(bot, m):
@@ -73,7 +74,7 @@ async def account_login(bot: Client, m: Message):
         await editable.edit(f"Total links🔗 found are **{len(links)}**\n\nSend From where you want to download initial is **1**")
         if m.chat.id not in Config.VIP_USERS:
             print(f"User ID not in AUTH_USERS", m.chat.id)
-            await bot.send_message(m.chat.id, f"**Oopss! You are not a Premium member **\n\n**PLEASE UPGRADE YOUR PLAN**\n\n**/upgrade for Plan Details**\n**Send me your user id for authorization your User id** -     `{m.chat.id}`\n\n**Sab kuch free me chahiye kya be laude**")
+            await bot.send_message(m.chat.id, f"**Oopss! You are not a Premium member **\n\n**PLEASE UPGRADE YOUR PLAN**\n\n**/upgrade for Plan Details**\n**Send me your user id for authorization your User id** -     `{m.chat.id}`\n\n**💶🪙**")
             return
         input0: Message = await bot.listen(editable.chat.id)
         raw_text = input0.text
@@ -183,8 +184,8 @@ async def account_login(bot: Client, m: Message):
                 cmd = f'yt-dlp -f "{ytf}" "{url}" -o "{name}.mp4"'    
                 
             try:
-                cc = f'**[🎓]Vid Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} [{raw_text2}] .mkv \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠ ** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🌟Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'
-                cc1 = f'**[🗳]Pdf Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} .pdf \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠:** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** 🌟Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'                   
+                cc = f'**[🎓]Vid Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} [{raw_text2}] .mkv \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠ ** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** ⏳Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'
+                cc1 = f'**[🗳]Pdf Id  ➠** {str(count).zfill(3)}\n** Tᴏᴘɪᴄ ➠** {name1} .pdf \n\n** Bᴀᴛᴄʜ Nᴀᴍᴇ ➠:** {b_name}\n\n** 𝖠ᴘᴘ 𝖭ᴀᴍᴇ ➤ ** {app_name}\n\n** ⏳Dᴏᴡɴʟᴏᴀᴅ Bʏ ➤ {MR}**\n\n'                   
 
                 if "drive" in url or ".pdf" in url or "pdfs" in url:
                     try:
@@ -206,10 +207,10 @@ async def account_login(bot: Client, m: Message):
                     await prog.delete(True)
                     await helper.merge_and_send_vid(bot, m, cc, name, prog, path, url, thumb,channel_id)
                     count += 1
-                    time.sleep(3)
+                    await asyncio.sleep(0.5)
                 else:
                     mpd = None
-                    Show = f"**🤖 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 🤖:-**\n\n**Name :-** `{name}\n🎥Video Quality - {raw_text2}\n\n Bot Made By  ⏰『sargio』⏰"
+                    Show = f"**⏳ 𝖣𝗈𝗐𝗇𝗅𝗈𝖺𝖽𝗂𝗇𝗀 𝖡𝗈𝗌𝗌 ⏳:-**\n\n**Name :-** `{name}\n🎥Video Quality - {raw_text2}\n\n Bot Made By  ⏰『sargio』⏰"
                     prog = await bot.send_message(channel_id, Show)
                     
                     # Use special function for Kalam videos
@@ -222,14 +223,27 @@ async def account_login(bot: Client, m: Message):
                     await prog.delete(True)
                     await helper.send_vid(bot, m, cc, filename, thumb, name, prog, url, channel_id)
                     count += 1
-                    time.sleep(1)
+                    await asyncio.sleep(0.5)
 
             except Exception as e:
-                await bot.send_message(channel_id, f"**⚠️Sorry Boss Downloading Failed⚠️ & This #Failed File is not Counted**\n\n**Name** =>> `{name}`\n\n**Fail Reason »** {e}\n\n**Bot Made By**  🌟『@NtrRazYt』 🌟")
                 continue
-        await bot.send_message(channel_id, " 🌟** Sᴜᴄᴄᴇsғᴜʟʟʏ Dᴏᴡɴʟᴏᴀᴅᴇᴅ Aʟʟ Lᴇᴄᴛᴜʀᴇs...! **🌟 ")
+        try:
+            await bot.send_message(channel_id, " 🌟** Sᴜᴄᴄᴇsғᴜʟʟʏ Dᴏᴡɴʟᴏᴀᴅᴇᴅ Aʟʟ Lᴇᴄᴛᴜʀᴇs...! **🌟 ")
+        except FloodWait as fw:
+            await asyncio.sleep(fw.value)
+            await bot.send_message(channel_id, " 🌟** Sᴜᴄᴄᴇsғᴜʟʟʏ Dᴏᴡɴʟᴏᴀᴅᴇᴅ Aʟʟ Lᴇᴄᴛᴜʀᴇs...! **🌟 ")
+    except FloodWait as fw:
+        await asyncio.sleep(fw.value)
+        try:
+            await m.reply_text(f"**⚠️Task Completed with some issues⚠️**")
+        except:
+            pass
+        return
     except Exception as e:
-        await m.reply_text(f"**⚠️Sorry Boss Downloading Failed⚠️**\n\n**Fail Reason »** {e}\n\n**Bot Made By**  ⏰『sargio』⏰")
+        try:
+            await m.reply_text(f"**⚠️Sorry Boss⚠️**\n\n**Error occurred, please try again**")
+        except:
+            pass
         return
 
 bot.run()
